@@ -5,7 +5,7 @@ import Card from '../Card';
 import './App.css';
 
 const SHORT_DATA_URL = 'http://www.filltext.com/?rows=32&id=%7Bnumber%7C1000%7D&firstName=%7BfirstName%7D&lastName=%7BlastName%7D&email=%7Bemail%7D&phone=%7Bphone%7C(xxx)xxx-xx-xx%7D&address=%7BaddressObject%7D&description=%7Blorem%7C32%7D';
-const LARGE_DATA_URL = 'http://www.filltext.com/?rows=32&id=%7Bnumber%7C1000%7D&firstName=%7BfirstName%7D&lastName=%7BlastName%7D&email=%7Bemail%7D&phone=%7Bphone%7C(xxx)xxx-xx-xx%7D&address=%7BaddressObject%7D&description=%7Blorem%7C32%7D';
+const LARGE_DATA_URL = 'http://www.filltext.com/?rows=1000&id=%7Bnumber%7C1000%7D&firstName=%7BfirstName%7D&delay=3&lastName=%7BlastName%7D&email=%7Bemail%7D&phone=%7Bphone%7C(xxx)xxx-xx-xx%7D&address=%7BaddressObject%7D&description=%7Blorem%7C32%7D';
 const ITEMS_PER_PAGE = 50;
 const FIELDS = [
     ['id', 'ID'],
@@ -24,9 +24,10 @@ class App extends Component {
             sortedUsers: [],
             filteredUsers: [],
             sortBy: null,
-            sortDirection: null,
+            sortDirection: 'desc',
             currentPage: 1,
-            selectedUser: null
+            selectedUser: null,
+            pages: 1
         };
     }
 
@@ -42,8 +43,12 @@ class App extends Component {
     async loadData(url) {
         const res = await fetch(url);
         const data = await res.json();
+        const pages = Math.ceil(data.length / ITEMS_PER_PAGE);
 
-        this.setState({ fullUsers: data }, this.sort);
+        this.setState({
+            fullUsers: data,
+            pages
+        }, this.sort)
     }
 
     loadLargeData() {
@@ -71,11 +76,26 @@ class App extends Component {
             newSortDirection = 'asc';
         }
 
-        if (newSortDirection === 'asc') {
-            sortedUsers = sortedUsers.sort((a, b) => a[sortBy] > b[sortBy]);
+        if (sortBy === 'id') {
+            if (newSortDirection === 'asc') {
+                sortedUsers = sortedUsers.sort((a, b) => a[sortBy] - b[sortBy]);
+            } else {
+                sortedUsers = sortedUsers.sort((a, b) => b[sortBy] - a[sortBy]);
+            }
         }
-        if (newSortDirection === 'desc') {
-            sortedUsers = sortedUsers.sort((a, b) => a[sortBy] < b[sortBy]);
+
+        if (sortBy !== 'id') {
+            if (newSortDirection === 'asc') {
+                sortedUsers = sortedUsers.sort((a, b) => {
+                    if (a[sortBy] > b[sortBy]) return 1;
+                    if (a[sortBy] < b[sortBy]) return -1;
+                });
+            } else {
+                sortedUsers = sortedUsers.sort((a, b) => {
+                    if (b[sortBy] > a[sortBy]) return 1;
+                    if (b[sortBy] < a[sortBy]) return -1;
+                });
+            }
         }
 
         this.setState({
@@ -106,8 +126,8 @@ class App extends Component {
         const { filteredUsers, currentPage } = this.state;
 
         return filteredUsers.slice(
-            currentPage - 1 * ITEMS_PER_PAGE,
-            ITEMS_PER_PAGE
+            (currentPage - 1) * ITEMS_PER_PAGE,
+            ITEMS_PER_PAGE * currentPage - 1
         );
     }
 
@@ -140,12 +160,28 @@ class App extends Component {
         }
     }
 
+    @bind
+    goToPage(i) {
+        this.setState({ currentPage: i})
+    }
+
+    renderPagination() {
+        let { pages } = this.state;
+        let btns = [];
+
+        for (var i = 1; i <= pages; i++ ) {
+            btns.push(<button key={i} onClick={this.goToPage.bind(this, i)}>{i}</button>)
+        }
+
+        return btns
+    }
+
     render() {
         const {
             sortBy,
             sortDirection,
             selectedUser } = this.state;
-
+        const btns = this.renderPagination();
         const tableData = this.getPageData();
 
         return (
@@ -162,8 +198,8 @@ class App extends Component {
                     sortDirection={sortDirection}
                     onSort={this.onSort}
                     onSelect={this.onSelect}/>
-                <div>1 2 3</div>
                 <Card data={selectedUser}/>
+                { btns.map(btn => btn)}
             </div>
         )
     }

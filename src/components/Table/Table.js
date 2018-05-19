@@ -11,7 +11,6 @@ class Table extends Component {
             PropTypes.arrayOf(PropTypes.string)
         ),
         data: PropTypes.arrayOf(PropTypes.object),
-
     }
 
     onTitleClick(name) {
@@ -35,7 +34,7 @@ class Table extends Component {
 
         return <tr className="Table__row Table__row_header">
             {fields.map(([name, title]) => {
-                const needSort = sortBy === title && sortDirection;
+                const needSort = sortBy === name && sortDirection;
                 const classes = cn({
                     Table__cell: true,
                     [`Table__cell_sort_${sortDirection}`]: needSort
@@ -50,8 +49,6 @@ class Table extends Component {
 
     render() {
         const { data, fields } = this.props;
-        const iconUp = '▲';
-        const iconDown = '▼';
 
         return (
             <table className='Table'>
