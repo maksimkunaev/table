@@ -21,6 +21,28 @@ class Table extends Component {
     }
 
     componentWillMount() {
+
+        // fetch('http://www.filltext.com/?rows=32&id=%7Bnumber%7C1000%7D&firstName=%7BfirstName%7D&lastName=%7BlastName%7D&email=%7Bemail%7D&phone=%7Bphone%7C(xxx)xxx-xx-xx%7D&address=%7BaddressObject%7D&description=%7Blorem%7C32%7D')
+        //   .then(response => {
+        //     console.log(response.json());
+
+        //     // return response.json();
+        //    })
+        let xhr = new XMLHttpRequest();
+        //small
+        xhr.open('GET', 'http://www.filltext.com/?rows=32&id=%7Bnumber%7C1000%7D&firstName=%7BfirstName%7D&lastName=%7BlastName%7D&email=%7Bemail%7D&phone=%7Bphone%7C(xxx)xxx-xx-xx%7D&address=%7BaddressObject%7D&description=%7Blorem%7C32%7D', true);
+        //large
+        // xhr.open('GET', 'http://www.filltext.com/?rows=1000&id=%7Bnumber%7C1000%7D&firstName=%7BfirstName%7D&delay=3&lastName=%7BlastName%7D&email=%7Bemail%7D&phone=%7Bphone%7C(xxx)xxx-xx-xx%7D&address=%7BaddressObject%7D&description=%7Blorem%7C32%7D', true);
+        xhr.setRequestHeader("Content-Type", "application/json");
+        xhr.onreadystatechange = () => {
+            if (xhr.readyState != 4) return;
+                if (xhr.status === 200) {
+                    console.log(`200, OK `, xhr)
+                } else {
+                    console.log(`not status 200 `, xhr)
+                }
+         }
+        xhr.send();
         this.getUsers();
     }
 
@@ -144,8 +166,9 @@ class Table extends Component {
                 let number = typeof user[key] === "number";
                 let notObject = str || number;
                 let hadSubString = String(user[key]).indexOf(value) !== -1;
+                let notDescription = key !== 'description';
 
-                if (notObject && hadSubString) found = true;
+                if (notObject && hadSubString && notDescription) found = true;
             }
             return found;
         })
