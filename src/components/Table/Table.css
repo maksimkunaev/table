@@ -1,19 +1,22 @@
 .Table {
-    display: table;
     width: 100%;
     border: 1px solid black;
 }
 
 .Table__row {
-    display: table-row;
     cursor: pointer;
 }
 
-.Table__row_header {
+.Table__row:hover {
+    background-color: rgba(0,0,0,.05);
+}
+
+.Table__row_header,
+.Table__row_header:hover {
     background-color: rgba(0,0,0,.2);
 }
 
 .Table__cell {
-    display: table-cell;
+    padding: 10px;
 }
 

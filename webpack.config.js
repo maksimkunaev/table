@@ -3,10 +3,12 @@ const webpack = require('webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const ExtractTextPlugin = require("extract-text-webpack-plugin");
 
+const srcPath = path.resolve(__dirname, 'src');
+
 module.exports = {
     context: __dirname,
     devtool: 'source-map',
-    entry: './src/index.js',
+    entry: `${srcPath}/index.js`,
     output: {
         path: path.join(__dirname, 'dist'),
         filename: 'index_bundle.js',
@@ -19,12 +21,12 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.js$/,
+                test: /\.(js|jsx)$/,
                 exclude: /node_modules/,
                 use: [
                     {
                          loader: 'babel-loader'
-                     }
+                    }
                 ]
             },
             {
@@ -39,7 +41,7 @@ module.exports = {
     },
     plugins: [
         new HtmlWebpackPlugin({
-            template: './src/index.html'
+            template: `${srcPath}/index.html`
         }),
         new ExtractTextPlugin("styles.css"),
         new webpack.NamedModulesPlugin(),

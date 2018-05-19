@@ -1,3 +1,17 @@
 {
-    "presets": ["env", "react"]
+  "presets": [
+    ["env", { "modules": false }],
+    "stage-2",
+    "react"
+  ],
+  "plugins": [
+    ["transform-runtime", {
+      "helpers": false,
+      "polyfill": false,
+      "regenerator": true,
+      "moduleName": "babel-runtime"
+    }],
+    "transform-decorators-legacy"
+  ],
+  "comments": false
 }
