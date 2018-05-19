@@ -1,5 +1,15 @@
 import React, { Component } from 'react';
+import cn from 'classnames';
 import './Table.css';
+
+const ITEMS_PER_PAGE = 50;
+const FIELDS = [
+    'id',
+    'firstName',
+    'lastName',
+    'email',
+    'phone',
+];
 
 class Table extends Component {
 
@@ -7,17 +17,12 @@ class Table extends Component {
         super(props);
         this.state = {
             fullUsers: [],
-            users: [],
+            sortedUsers: [],
             filteredUsers: [],
-            searched: null,
-            sorted: {
-                id: null,
-                firstName: null,
-                lastName: null,
-                email: null,
-                phone: null
-            }
-        }
+            sortBy: null,
+            sortDirection: null,
+            currentPage: 1
+        };
     }
 
     componentWillMount() {
@@ -37,192 +42,122 @@ class Table extends Component {
         xhr.onreadystatechange = () => {
             if (xhr.readyState != 4) return;
                 if (xhr.status === 200) {
-                    console.log(`200, OK `, xhr)
+                    let users = JSON.parse(xhr.responseText)
+                    console.log(`200, OK `, users);
+                    this.getUsers(users)
                 } else {
                     console.log(`not status 200 `, xhr)
                 }
          }
         xhr.send();
-        this.getUsers();
     }
 
-    getUsers() {
-        let fullUsers = [
-            {
-                id: 101,
-                firstName: 'Rrre',
-                lastName: 'Lorson',
-                email: 'HWhalley@in.gov',
-                phone: '(612)999-6296',
-                address: {
-                    streetAddress: '9792 Mattis Ct',
-                    city: 'Waukesha',
-                    state: 'WI',
-                    zip: '22178'
-                },
-                description: 'et lacus magna dolor...'
-            },
-            {
-                id: 102,
-                firstName: 'Sue',
-                lastName: 'Corson',
-                email: 'yyyyey@in.gov',
-                phone: '(612)555-6296',
-                address: {
-                    streetAddress: '9792 Mattis Ct',
-                    city: 'Waukesha',
-                    state: 'WI',
-                    zip: '22178'
-                },
-                description: 'et lacus magna dolor...'
-            },
-            {
-                id: 123,
-                firstName: 'Joe',
-                lastName: 'Aon',
-                email: 'aaaalley@in.gov',
-                phone: '(612)111-6296',
-                address: {
-                    streetAddress: '9792 Mattis Ct',
-                    city: 'Waukesha',
-                    state: 'WI',
-                    zip: '22178'
-                },
-                description: 'et lacus magna dolor...'
-            },
-            {
-                id: 113,
-                firstName: 'ert',
-                lastName: 'Aon',
-                email: 'aaaalley@in.gov',
-                phone: '(612)151-6296',
-                address: {
-                    streetAddress: '9792 Mattis Ct',
-                    city: 'Waukesha',
-                    state: 'WI',
-                    zip: '22178'
-                },
-                description: 'et lacus magna dolor...'
-            },
-            {
-                id: 213,
-                firstName: 'Joer',
-                lastName: 'Aon',
-                email: 'aaaalley@in.gov',
-                phone: '(612)211-6296',
-                address: {
-                    streetAddress: '9792 Mattis Ct',
-                    city: 'Waukesha',
-                    state: 'WI',
-                    zip: '22178'
-                },
-                description: 'et lacus magna dolor...'
-            },
+    getUsers(users) {
+        let fullUsers = users;
 
-
-        ]
-
-        this.setState({
-            fullUsers: fullUsers,
-            users: fullUsers.slice(0,50)
-        })
+        this.setState({ fullUsers }, this.sort.bind(this));
     }
 
-    onSortTable(e) {
-        let { users, sorted } = this.state;
-        let target = e.target;
+    onSort(e) {
+        const sortBy = e.target.getAttribute('data-sort-name');
 
-        let sortBy = target === this.id ? 'id':
-            target === this.firstName ? 'firstName':
-            target === this.lastName ? 'lastName':
-            target === this.email ? 'email':
-            target === this.phone ? 'phone': '';
+        this.sort(sortBy);
+    }
 
-        if (target === this[sortBy] ) {
-            if (sorted[sortBy]) {
-                users.sort( (a, b) => a[sortBy] > b[sortBy]);
-                sorted[sortBy] = false;
-            } else {
-                users.sort( (a, b) => a[sortBy] < b[sortBy]);
-                sorted[sortBy] = true;
-            }
-            this.setState({
-                users,
-                sorted
-            })
+    sort(sortBy) {
+        const { fullUsers, sortDirection } = this.state;
+
+        let newSortDirection = sortDirection;
+        let sortedUsers = fullUsers.slice();
+
+        if (sortDirection === 'asc') {
+            newSortDirection = 'desc';
         }
+        if (sortDirection === 'desc') {
+            newSortDirection = null;
+        }
+        if (sortDirection === null) {
+            newSortDirection = 'asc';
+        }
+
+        if (newSortDirection === 'asc') {
+            sortedUsers = sortedUsers.sort((a, b) => a[sortBy] > b[sortBy]);
+        }
+        if (newSortDirection === 'desc') {
+            sortedUsers = sortedUsers.sort((a, b) => a[sortBy] < b[sortBy]);
+        }
+
+        this.setState({
+            sortBy,
+            sortDirection: newSortDirection,
+            sortedUsers
+        }, this.filter.bind(this));
     }
 
-    searchString(e) {
-        e.preventDefault();
-        let value = this.search.value;
-        let { users, searched } = this.state;
+    filter() {
+        const { filter } = this.props;
+        const { sortedUsers } = this.state;
 
-        let filteredUsers = users.filter((user, i) => {
-            let found = false;
+        const filteredUsers = sortedUsers.filter((user, i) => {
+            return Object.keys(user).some(key => {
+                const str = typeof user[key] === "string";
+                const number = typeof user[key] === "number";
+                const notObject = str || number;
 
-            for (let key in user) {
-                let str = typeof user[key] === "string";
-                let number = typeof user[key] === "number";
-                let notObject = str || number;
-                let hadSubString = String(user[key]).indexOf(value) !== -1;
-                let notDescription = key !== 'description';
+                return String(user[key]).indexOf(filter) !== -1;
+            });
+        });
 
-                if (notObject && hadSubString && notDescription) found = true;
-            }
-            return found;
-        })
-        this.setState({
-            filteredUsers: filteredUsers,
-            searched: true
-        })
+        this.setState({ filteredUsers });
+    }
+
+    getPageData() {
+        const { filteredUsers, currentPage } = this.state;
+
+        return filteredUsers.slice(
+            currentPage - 1 * ITEMS_PER_PAGE,
+            ITEMS_PER_PAGE
+        );
+    }
+
+    renderHeader() {
+        const { sortBy, sortDirection } = this.state;
+
+        return <div className="Table__row Table__row_header">
+            {FIELDS.map(field => {
+                const needSort = sortBy === field && sortDirection;
+                const classes = cn({
+                    Table__cell: true,
+                    [`Table__cell_sort_${sortDirection}`]: needSort
+                });
+
+                return <div className={classes} key={field}>
+                    {field}
+                </div>
+            })}
+        </div>
     }
 
     render() {
-
-        let { users, sorted, filteredUsers, searched } = this.state;
-        let iconUp = '▲',
-            iconDown = '▼';
-
-        let renderUsers = searched ? filteredUsers: users;
+        const { sortBy } = this.state;
+        const items = this.getPageData();
+        const iconUp = '▲';
+        const iconDown = '▼';
 
         return (
-            <div className='Table__table' onClick={this.onSortTable.bind(this)}>
-                <form className='App__search' onSubmit={this.searchString.bind(this)}>
-                    <input ref={ node => this.search = node}/>
-                    <button>Найти</button>
-                </form>
-
-                <div className='Table__name'>USERS</div>
-                    <div className='Table__headers'>
-                    { renderUsers.map}
-                        <div ref={node => this.id = node}
-                            className='Table__column_id'>
-                            id {sorted.id ? iconDown:iconUp}</div>
-                        <div ref={node => this.firstName = node}
-                            className='Table__column_firstName'>
-                            firstName {sorted.firstName ? iconDown:iconUp}</div>
-                        <div ref={node => this.lastName = node}
-                            className='Table__column_lastName'>
-                            lastName {sorted.lastName ? iconDown:iconUp}</div>
-                        <div ref={node => this.email = node}
-                            className='Table__column_email'>
-                            email {sorted.email ? iconDown:iconUp}</div>
-                        <div ref={node => this.phone = node}
-                            className='Table__column_phone'>
-                            phone {sorted.phone ? iconDown:iconUp}</div>
-                    </div>
-                    <div className='Table__content'>
-                    {
-                        renderUsers.map((user, i) => <div key={i}className='Table__string'>
-                        <div className='Table__column_id'>{user.id}</div>
-                        <div className='Table__column_firstName'>{user.firstName}</div>
-                        <div className='Table__column_lastName'>{user.lastName}</div>
-                        <div className='Table__column_email'>{user.email}</div>
-                        <div className='Table__column_phone'>{user.phone}</div>
-                    </div>)
-                    }
-                </div>
+            <div className='Table'>
+                {this.renderHeader()}
+                {items.map(({ id, firstName, lastName, email, phone }, i) => {
+                    return (
+                        <div className='Table__row' key={i}>
+                            <div className='Table__cell'>{id}</div>
+                            <div className='Table__cell'>{firstName}</div>
+                            <div className='Table__cell'>{lastName}</div>
+                            <div className='Table__cell'>{email}</div>
+                            <div className='Table__cell'>{phone}</div>
+                        </div>
+                    )
+                })}
             </div>
         )
     }

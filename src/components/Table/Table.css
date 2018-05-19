@@ -1,54 +1,19 @@
-.Table__table,
-.Table__headers,
-.Table__name,
-.Table__string,
-.Table__content {
-    display: flex;
-}
-
-.Table__table {
-    flex-direction: column;
+.Table {
+    display: table;
     width: 100%;
     border: 1px solid black;
-    box-sizing: border-box;
+}
+
+.Table__row {
+    display: table-row;
     cursor: pointer;
 }
 
-.Table__name {
-    justify-content: center;
+.Table__row_header {
+    background-color: rgba(0,0,0,.2);
 }
 
-.Table__headers {
+.Table__cell {
+    display: table-cell;
 }
-
-.Table__content {
-    flex-direction: column;
-}
-
-.Table__string {
-}
-
-.Table__column_id,
-.Table__column_firstName,
-.Table__column_lastName,
-.Table__column_email,
-.Table__column_phone {
-}
-
-.Table__column_id {
-    width: 50px;
-}
-.Table__column_firstName {
-    width: 100px;
-}
-.Table__column_lastName {
-    width: 100px;
-}
-.Table__column_email {
-    width: 250px;
-}
-.Table__column_phone {
-    width: 200px;
-}
-
 

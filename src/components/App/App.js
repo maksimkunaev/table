@@ -3,32 +3,29 @@ import Table from '../Table/Table';
 import './App.css';
 
 class App extends Component {
+    constructor(props) {
+        super(props);
+        this.state = {
+            search: ''
+        };
+    }
 
-    searchString(value) {
-        let users = [];
-        var filteredUsers = users.filter((user, i) => {
-            var found = false;
-
-            for (key in users) {
-                var str = typeof users[key] === "string";
-                var number = typeof users[key] === "number";
-                var notObject = str || number;
-                var hadSubString = String(users[key]).indexOf(value) !== -1;
-
-                if (notObject && hadSubString) found = true;
-            }
-            return found;
-        })
+    onSearch(e) {
+        e.preventDefault();
+        this.setState({ search: this.search.value });
     }
 
     render() {
+        const { search } = this.state;
+
         return (
             <div className='App'>
-                <form className='App__search' onSubmit={this.searchString.bind(this)}>
-                    <input />
+                <form className='App__search' onSubmit={this.onSearch.bind(this)}>
+                    <input ref={el => this.search = el}/>
                     <button>Найти</button>
                 </form>
-                <Table />
+                <h1>USERS</h1>
+                <Table filter={search} />
             </div>
         )
     }
