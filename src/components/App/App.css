@@ -1,65 +1,11 @@
-.App__table,
-.App__headers,
-.App__name,
-.App__string,
-.App__content,
-.App__search {
+.App {
     display: flex;
-}
-
-.App__table {
     flex-direction: column;
-    width: 700px;
+    width: 850px;
     margin: 0 auto;
-    border: 1px solid black;
-    box-sizing: border-box;
-    cursor: pointer;
-}
-
-.App__name {
-    justify-content: center;
-}
-
-.App__headers {
-    /*justify-content: space-evenly;*/
-}
-
-.App__content {
-    flex-direction: column;
-}
-
-.App__string {
-    /*justify-content: space-evenly;*/
-}
-
-.App__column_id,
-.App__column_firstName,
-.App__column_lastName,
-.App__column_email,
-.App__column_phone {
-    /*justify-content: center;*/
 }
 
 .App__search {
-
+    margin-bottom: 10px;
 }
 
-.App__column_id {
-    width: 50px;
-}
-.App__column_firstName {
-    width: 100px;
-}
-.App__column_lastName {
-    width: 100px;
-}
-.App__column_email {
-    width: 250px;
-}
-.App__column_phone {
-    width: 200px;
-}
-
-div {
-    /*border: 1px dashed #ccc;*/
-}
