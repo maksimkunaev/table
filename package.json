@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "build": "webpack --mode production",
-    "dev": "webpack-dev-server --mode development --progress"
+    "dev": "webpack --mode development --progress --watch",
+    "server": "node server"
   },
   "author": "Maksim Kunaev",
   "license": "ISC",
@@ -30,6 +31,7 @@
     "babel-preset-stage-2": "^6.24.1",
     "classnames": "^2.2.5",
     "decko": "^1.2.0",
+    "express": "^4.16.3",
     "material-ui": "^1.0.0-beta.46",
     "react": "^16.3.2",
     "react-dom": "^16.3.2"

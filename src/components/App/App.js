@@ -2,6 +2,7 @@ import React, { Component } from 'react';
 import { bind } from 'decko';
 import Table from '../Table/Table';
 import Card from '../Card';
+import Header from '../Header/Header.jsx';
 import './App.css';
 import CircularProgress from '@material-ui/core/CircularProgress';
 
@@ -147,9 +148,8 @@ class App extends Component {
     }
 
     @bind
-    onFilter(e) {
-        e.preventDefault();
-        this.setState({ filter: this.filterControl.value }, this.filter);
+    onFilter(value) {
+        this.setState({ filter: value }, this.filter);
     }
 
     @bind
@@ -176,7 +176,7 @@ class App extends Component {
             btns.push(<button key={i} onClick={this.goToPage.bind(this, i)}>{i}</button>)
         }
 
-        return btns
+        return btns;
     }
 
     render() {
@@ -194,7 +194,7 @@ class App extends Component {
                 <CircularProgress size={70} />
             </div>
         } else {
-            content = <div>
+            content = <div className="App__content">
                 <Table
                     fields={FIELDS}
                     data={tableData}
@@ -209,12 +209,9 @@ class App extends Component {
 
         return (
             <div className='App'>
-                <form className='App__filter' onSubmit={this.onFilter}>
-                    <input ref={el => this.filterControl = el}/>
-                    <button>Найти</button>
-                </form>
-                <h1>USERS</h1>
-                { content }
+            <Header className='App__filter' onFilter={this.onFilter}/>
+            <h1>USERS</h1>
+            { content }
             </div>
         )
     }
