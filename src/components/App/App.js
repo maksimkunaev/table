@@ -1,10 +1,11 @@
 import React, { Component } from 'react';
 import { bind } from 'decko';
-import Table from '../Table/Table';
+import Table from '../Table';
 import Card from '../Card';
 import Header from '../Header/Header.jsx';
 import './App.css';
 import CircularProgress from '@material-ui/core/CircularProgress';
+import cn from 'classnames';
 
 const SHORT_DATA_URL = 'http://www.filltext.com/?rows=32&id=%7Bnumber%7C1000%7D&firstName=%7BfirstName%7D&lastName=%7BlastName%7D&email=%7Bemail%7D&phone=%7Bphone%7C(xxx)xxx-xx-xx%7D&address=%7BaddressObject%7D&description=%7Blorem%7C32%7D';
 const LARGE_DATA_URL = 'http://www.filltext.com/?rows=1000&id=%7Bnumber%7C1000%7D&firstName=%7BfirstName%7D&delay=3&lastName=%7BlastName%7D&email=%7Bemail%7D&phone=%7Bphone%7C(xxx)xxx-xx-xx%7D&address=%7BaddressObject%7D&description=%7Blorem%7C32%7D';
@@ -46,11 +47,9 @@ class App extends Component {
     async loadData(url) {
         const res = await fetch(url);
         const data = await res.json();
-        const pages = Math.ceil(data.length / ITEMS_PER_PAGE);
 
         this.setState({
             fullUsers: data,
-            pages,
             loaded: true
         }, this.sort)
     }
@@ -111,23 +110,39 @@ class App extends Component {
 
     @bind
     filter() {
-        const { sortedUsers, filter } = this.state;
-
+        const { sortedUsers, filter, currentPage } = this.state;
+        const filterLower = filter.toLowerCase();
         const filteredUsers = sortedUsers.filter((user, i) => {
             return Object.keys(user).some(key => {
                 const str = typeof user[key] === "string";
                 const number = typeof user[key] === "number";
                 const notObject = str || number;
 
-                return String(user[key]).indexOf(filter) !== -1;
+                if (key === 'description') return;
+                if (!notObject ) return;
+
+                let strLower = String(user[key]).toLowerCase();
+
+                return strLower.indexOf(filterLower) !== -1;
             });
         });
 
-        this.setState({ filteredUsers });
+        const pages = Math.ceil(filteredUsers.length / ITEMS_PER_PAGE);
+        let newCurrentPage = currentPage;
+        if (currentPage > pages) newCurrentPage = pages;
+
+        this.setState({
+            filteredUsers,
+            pages,
+            currentPage: newCurrentPage });
     }
 
     getPageData() {
         const { filteredUsers, currentPage } = this.state;
+        const arr = filteredUsers.slice(
+            (currentPage - 1) * ITEMS_PER_PAGE,
+            ITEMS_PER_PAGE * currentPage - 1
+        )
 
         return filteredUsers.slice(
             (currentPage - 1) * ITEMS_PER_PAGE,
@@ -169,14 +184,18 @@ class App extends Component {
     }
 
     renderPagination() {
-        let { pages } = this.state;
+        const { pages, currentPage } = this.state;
         let btns = [];
 
         for (var i = 1; i <= pages; i++ ) {
-            btns.push(<button key={i} onClick={this.goToPage.bind(this, i)}>{i}</button>)
+            const classes = cn({
+                App__navigation_button: true,
+                App__navigation_button_active: currentPage === i
+            });
+            btns.push(<button className={classes} key={i} onClick={this.goToPage.bind(this, i)}>{i}</button>)
         }
 
-        return btns;
+        return <div className='App__navigation'>{btns.map(btn => btn)}</div>;
     }
 
     render() {
@@ -195,6 +214,7 @@ class App extends Component {
             </div>
         } else {
             content = <div className="App__content">
+            { btns}
                 <Table
                     fields={FIELDS}
                     data={tableData}
@@ -203,7 +223,7 @@ class App extends Component {
                     onSort={this.onSort}
                     onSelect={this.onSelect}/>
                 <Card data={selectedUser}/>
-                { btns.map(btn => btn)}
+                { btns}
             </div>
         }
 

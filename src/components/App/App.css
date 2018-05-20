@@ -20,3 +20,23 @@
     max-width: 100%;
     overflow-x: auto;
 }
+
+.App__navigation {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+    margin-top: 10px;
+ }
+.App__navigation_button {
+    width: 30px;
+    border: 1px solid #b6b6b6;
+    border-radius: 3px;
+    background: #707070;
+    color: #ffffff;
+    margin: 1px;
+}
+
+.App__navigation_button_active {
+    background: #dcfffe;
+    color: #544e4e;
+}
